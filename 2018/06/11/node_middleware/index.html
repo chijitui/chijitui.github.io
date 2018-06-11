@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="中间件 在 Node.js 中被广泛使用，它泛指一种特定的设计模式、一系列的处理单元、过滤器和处理程序，以函数的形式存在，连接在一起，形成一个异步队列，来完成对任何数据的预处理和后处理。 它的优点在于 灵活性：使用中间件我们用极少的操作就能得到一个插件，用最简单的方法就能将新的过滤器和处理程序扩展到现有的系统上。 常规中间件模式中间件模式中，最基础的组成部分就是 中间件管理器，我们可以用它来组织和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Node.js 中间件模式">
+<meta property="og:url" content="http://www.xiaozixiang.com/2018/06/11/node_middleware/index.html">
+<meta property="og:site_name" content="Xiao&#39;s Home">
+<meta property="og:description" content="中间件 在 Node.js 中被广泛使用，它泛指一种特定的设计模式、一系列的处理单元、过滤器和处理程序，以函数的形式存在，连接在一起，形成一个异步队列，来完成对任何数据的预处理和后处理。 它的优点在于 灵活性：使用中间件我们用极少的操作就能得到一个插件，用最简单的方法就能将新的过滤器和处理程序扩展到现有的系统上。 常规中间件模式中间件模式中，最基础的组成部分就是 中间件管理器，我们可以用它来组织和">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/5236403-89a09dec2d661faa.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/5236403-295fc7dcfb50fcf6.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-06-11T09:26:14.511Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Node.js 中间件模式">
+<meta name="twitter:description" content="中间件 在 Node.js 中被广泛使用，它泛指一种特定的设计模式、一系列的处理单元、过滤器和处理程序，以函数的形式存在，连接在一起，形成一个异步队列，来完成对任何数据的预处理和后处理。 它的优点在于 灵活性：使用中间件我们用极少的操作就能得到一个插件，用最简单的方法就能将新的过滤器和处理程序扩展到现有的系统上。 常规中间件模式中间件模式中，最基础的组成部分就是 中间件管理器，我们可以用它来组织和">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/5236403-89a09dec2d661faa.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.xiaozixiang.com/2018/06/11/node_middleware/"/>
+
+
+
+
+
+  <title>Node.js 中间件模式 | Xiao's Home</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Xiao's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.xiaozixiang.com/2018/06/11/node_middleware/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xiao's Home">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xiao's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Node.js 中间件模式</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-11T17:25:49+08:00">
+                2018-06-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>中间件</strong> 在 Node.js 中被广泛使用，它泛指一种特定的设计模式、一系列的处理单元、过滤器和处理程序，以函数的形式存在，连接在一起，形成一个异步队列，来完成对任何数据的预处理和后处理。</p>
+<p>它的优点在于 <strong>灵活性</strong>：使用中间件我们用极少的操作就能得到一个插件，用最简单的方法就能将新的过滤器和处理程序扩展到现有的系统上。</p>
+<h3 id="常规中间件模式"><a href="#常规中间件模式" class="headerlink" title="常规中间件模式"></a>常规中间件模式</h3><p>中间件模式中，最基础的组成部分就是 <strong>中间件管理器</strong>，我们可以用它来组织和执行中间件的函数，如图所示：<br><img src="https://upload-images.jianshu.io/upload_images/5236403-89a09dec2d661faa.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="中间件.jpg"></p>
+<p>要实现中间件模式，最重要的实现细节是：</p>
+<ul>
+<li>可以通过调用<code>use()</code>函数来注册新的中间件，通常，新的中间件只能被添加到高压包带的末端，但不是严格要求这么做；</li>
+<li>当接收到需要处理的新数据时，注册的中间件在意不执行流程中被依次调用。每个中间件都接受上一个中间件的执行结果作为输入值；</li>
+<li>每个中间件都可以停止数据的进一步处理，只需要简单地不调用它的毁掉函数或者将错误传递给回调函数。当发生错误时，通常会触发执行另一个专门处理错误的中间件。</li>
+</ul>
+<p>至于怎么处理传递数据，目前没有严格的规则，一般有几种方式</p>
+<ul>
+<li>通过添加属性和方法来增强；</li>
+<li>使用某种处理的结果来替换 data；</li>
+<li>保证原始要处理的数据不变，永远返回新的副本作为处理的结果。</li>
+</ul>
+<p>而具体的处理方式取决于 <strong>中间件管理器</strong> 的实现方式以及中间件本身要完成的任务类型。</p>
+<p>举一个来自于 <strong>《Node.js 设计模式 第二版》</strong> 的一个为消息传递库实现 <strong>中间件管理器</strong> 的例子：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ZmqMiddlewareManager</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(socket) &#123;</span><br><span class="line">        <span class="keyword">this</span>.socket = socket;</span><br><span class="line">        <span class="comment">// 两个列表分别保存两类中间件函数：接受到的信息和发送的信息。</span></span><br><span class="line">        <span class="keyword">this</span>.inboundMiddleware = [];</span><br><span class="line">        <span class="keyword">this</span>.outboundMiddleware = [];</span><br><span class="line">        socket.on(<span class="string">'message'</span>, message =&gt; &#123;</span><br><span class="line">            <span class="keyword">this</span>.executeMiddleware(<span class="keyword">this</span>.inboundMiddleware, &#123;</span><br><span class="line">                data: message</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    send(data) &#123;</span><br><span class="line">        <span class="keyword">const</span> message = &#123; data &#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">this</span>.excuteMiddleware(<span class="keyword">this</span>.outboundMiddleware, message, () =&gt; &#123;</span><br><span class="line">            <span class="keyword">this</span>.socket.send(message.data);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    use(middleware) &#123;</span><br><span class="line">        <span class="keyword">if</span>(middleware.inbound) &#123;</span><br><span class="line">            <span class="keyword">this</span>.inboundMiddleware.push(middleware.inbound);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(middleware.outbound) &#123;</span><br><span class="line">            <span class="keyword">this</span>.outboundMiddleware.push(middleware.outbound);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    exucuteMiddleware(middleware, arg, finish) &#123;</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">iterator</span>(<span class="params">index</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(index === middleware.length) &#123;</span><br><span class="line">                <span class="keyword">return</span> finish &amp;&amp; finish();</span><br><span class="line">            &#125;</span><br><span class="line">            middleware[index].call(<span class="keyword">this</span>, arg, err =&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span>(err) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="built_in">console</span>.log(<span class="string">'There was an error: '</span> + err.message);</span><br><span class="line">                &#125;</span><br><span class="line">                iterator.call(<span class="keyword">this</span>, ++index);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        iterator.call(<span class="keyword">this</span>, <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接下来只需要创建中间件，分别在<code>inbound</code>和<code>outbound</code>中写入中间件函数，然后执行完毕调用<code>next()</code>就好了。比如：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> zmqm = <span class="keyword">new</span> ZmqMiddlewareManager();</span><br><span class="line"></span><br><span class="line">zmqm.use(&#123;</span><br><span class="line">    inbound: <span class="function"><span class="keyword">function</span>(<span class="params">message, next</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'input message: '</span>, message.data);</span><br><span class="line">        next();</span><br><span class="line">    &#125;,</span><br><span class="line">    outbound: <span class="function"><span class="keyword">function</span>(<span class="params">message, next</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'output message: '</span>, message.data);</span><br><span class="line">        next();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Express 所推广的 <strong>中间件</strong> 概念就与之类似，一个 Express 中间件一般是这样的：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span>(<span class="params">req, res, next</span>) </span>&#123; ... &#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="Koa2-中使用的中间件"><a href="#Koa2-中使用的中间件" class="headerlink" title="Koa2 中使用的中间件"></a>Koa2 中使用的中间件</h3><p>前面展示的中间件模型使用回调函数实现的，但是现在有一个比较时髦的 Node.js 框架<code>Koa2</code>的中间件实现方式与之前描述的有一些不太相同。<code>Koa2</code>中的中间件模式移除了一开始使用<code>ES2015</code>中的生成器实现的方法，兼容了回调函数、<code>convert</code>后的生成器以及<code>async</code>和<code>await</code>。</p>
+<p>在<code>Koa2</code>官方文档中给出了一个关于中间件的 <strong>洋葱模型</strong>，如下图所示：<br><img src="https://upload-images.jianshu.io/upload_images/5236403-295fc7dcfb50fcf6.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="koa中间件.jpg"></p>
+<p>从图中我们可以看到，先进入<code>inbound</code>的中间件函数在<code>outbound</code>中被放到了后面执行，那么究竟是为什么呢？带着这个问题我们去读一下<code>Koa2</code>的源码。</p>
+<p>在<code>koa/lib/applications.js</code>中，先看构造函数，其它的都可以不管，关键就是<code>this.middleware</code>，它是一个<code>inbound</code>队列：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.proxy = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">this</span>.middleware = [];</span><br><span class="line">    <span class="keyword">this</span>.subdomainOffset = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">this</span>.env = process.env.NODE_ENV || <span class="string">'development'</span>;</span><br><span class="line">    <span class="keyword">this</span>.context = <span class="built_in">Object</span>.create(context);</span><br><span class="line">    <span class="keyword">this</span>.request = <span class="built_in">Object</span>.create(request);</span><br><span class="line">    <span class="keyword">this</span>.response = <span class="built_in">Object</span>.create(response);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>和上面一样，在<code>Koa2</code>中也是用<code>use()</code>来把中间件放入队列中：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">use(fn) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> fn !== <span class="string">'function'</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">'middleware must be a function!'</span>);</span><br><span class="line">    <span class="keyword">if</span> (isGeneratorFunction(fn)) &#123;</span><br><span class="line">        deprecate(<span class="string">'Support for generators will be removed in v3. '</span> +</span><br><span class="line">                <span class="string">'See the documentation for examples of how to convert old middleware '</span> +</span><br><span class="line">                <span class="string">'https://github.com/koajs/koa/blob/master/docs/migration.md'</span>);</span><br><span class="line">        fn = convert(fn);</span><br><span class="line">    &#125;</span><br><span class="line">    debug(<span class="string">'use %s'</span>, fn._name || fn.name || <span class="string">'-'</span>);</span><br><span class="line">    <span class="keyword">this</span>.middleware.push(fn);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接着我们看框架对端口监听进行了一个简单的封装：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 封装之前 http.createServer(app.callback()).listen(...)</span></span><br><span class="line">listen(...args) &#123;</span><br><span class="line">    debug(<span class="string">'listen'</span>);</span><br><span class="line">    <span class="keyword">const</span> server = http.createServer(<span class="keyword">this</span>.callback());</span><br><span class="line">    <span class="keyword">return</span> server.listen(...args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>中间件的管理关键就在于<code>this.callback()</code>，看一下这个方法：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">callback() &#123;</span><br><span class="line">    <span class="keyword">const</span> fn = compose(<span class="keyword">this</span>.middleware);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">this</span>.listenerCount(<span class="string">'error'</span>)) <span class="keyword">this</span>.on(<span class="string">'error'</span>, <span class="keyword">this</span>.onerror);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">const</span> handleRequest = <span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> ctx = <span class="keyword">this</span>.createContext(req, res);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.handleRequest(ctx, fn);</span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> handleRequest;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里的<code>compose</code>方法实际上是<code>Koa2</code>的一个核心模块<code>koa-compose</code>(<a href="https://github.com/koajs/compose)，在这个模块中封装了中间件执行的方法：" target="_blank" rel="noopener">https://github.com/koajs/compose)，在这个模块中封装了中间件执行的方法：</a><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">compose</span> (<span class="params">middleware</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">Array</span>.isArray(middleware)) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">'Middleware stack must be an array!'</span>)</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> fn <span class="keyword">of</span> middleware) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">typeof</span> fn !== <span class="string">'function'</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">'Middleware must be composed of functions!'</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">      <span class="comment">/**</span></span><br><span class="line"><span class="comment">       * @param &#123;Object&#125; context</span></span><br><span class="line"><span class="comment">       * @return &#123;Promise&#125;</span></span><br><span class="line"><span class="comment">       * @api public</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params">context, next</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// last called middleware #</span></span><br><span class="line">        <span class="keyword">let</span> index = <span class="number">-1</span></span><br><span class="line">        <span class="keyword">return</span> dispatch(<span class="number">0</span>)</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">dispatch</span> (<span class="params">i</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (i &lt;= index) <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(<span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'next() called multiple times'</span>))</span><br><span class="line">            index = i</span><br><span class="line">            <span class="keyword">let</span> fn = middleware[i]</span><br><span class="line">            <span class="keyword">if</span> (i === middleware.length) fn = next</span><br><span class="line">            <span class="keyword">if</span> (!fn) <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve()</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve(fn(context, dispatch.bind(<span class="literal">null</span>, i + <span class="number">1</span>)));</span><br><span class="line">            &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(err)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，<code>compose</code>通过递归对中间件队列进行了 <strong>反序遍历</strong>，生成了一个<code>Promise</code>链，接下来，只需要调用<code>Promise</code>就可以执行中间件函数了：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">handleRequest(ctx, fnMiddleware) &#123;</span><br><span class="line">    <span class="keyword">const</span> res = ctx.res;</span><br><span class="line">    res.statusCode = <span class="number">404</span>;</span><br><span class="line">    <span class="keyword">const</span> onerror = <span class="function"><span class="params">err</span> =&gt;</span> ctx.onerror(err);</span><br><span class="line">    <span class="keyword">const</span> handleResponse = <span class="function"><span class="params">()</span> =&gt;</span> respond(ctx);</span><br><span class="line">    onFinished(res, onerror);</span><br><span class="line">    <span class="keyword">return</span> fnMiddleware(ctx).then(handleResponse).catch(onerror);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从源码中可以发现，<code>next()</code>中返回的是一个<code>Promise</code>，所以通用的中间件写法是：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">app.use(<span class="function">(<span class="params">ctx, next</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> start = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">    <span class="keyword">return</span> next().then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> ms = <span class="keyword">new</span> <span class="built_in">Date</span>() - start;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;ctx.method&#125;</span> <span class="subst">$&#123;ctx.url&#125;</span> - <span class="subst">$&#123;ms&#125;</span>ms`</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>当然如果要用<code>async</code>和<code>await</code>也行：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">app.use(<span class="function">(<span class="params">ctx, next</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> start = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">    <span class="keyword">await</span> next();</span><br><span class="line">    <span class="keyword">const</span> ms = <span class="keyword">new</span> <span class="built_in">Date</span>() - start;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;ctx.method&#125;</span> <span class="subst">$&#123;ctx.url&#125;</span> - <span class="subst">$&#123;ms&#125;</span>ms`</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>由于还有很多<code>Koa1</code>的项目中间件是基于生成器的，需要使用<code>koa-convert</code>来进行平滑升级：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> convert = <span class="built_in">require</span>(<span class="string">'koa-convert'</span>);</span><br><span class="line"></span><br><span class="line">app.use(convert(<span class="function"><span class="keyword">function</span> *(<span class="params">next</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> start = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">    <span class="keyword">yield</span> next;</span><br><span class="line">    <span class="keyword">const</span> ms = <span class="keyword">new</span> <span class="built_in">Date</span>() - start;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;<span class="keyword">this</span>.method&#125;</span> <span class="subst">$&#123;<span class="keyword">this</span>.url&#125;</span> - <span class="subst">$&#123;ms&#125;</span>ms`</span>);</span><br><span class="line">&#125;));</span><br></pre></td></tr></table></figure></p>
+<p>最后，如果发现什么错漏也欢迎提出！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/07/factory_pattern/" rel="next" title="js设计模式：工厂模式">
+                <i class="fa fa-chevron-left"></i> js设计模式：工厂模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Xiao's Home</p>
+              <p class="site-description motion-element" itemprop="description">VIPKID 长期招聘前端工程师，简历可以发送到 xiaozixiang@vipkid.com.cn</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/yourname" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/2834174855" target="_blank" title="微博">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>微博</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.jianshu.com/u/d877bc182fb4" target="_blank" title="简书">
+                      
+                        <i class="fa fa-fw fa-user"></i>简书</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#常规中间件模式"><span class="nav-number">1.</span> <span class="nav-text">常规中间件模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Koa2-中使用的中间件"><span class="nav-number">2.</span> <span class="nav-text">Koa2 中使用的中间件</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiao's Home</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
