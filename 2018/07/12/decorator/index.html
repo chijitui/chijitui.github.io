@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="许多面向对象的语言都有 装饰器(Decorator) 函数，用来修改类的行为。目前，这个方法已经被引入了 ES7，但是无论是主流浏览器还是 Node.js 对它的兼容性都不是特别友好。 因此要在项目中使用Decorator的话，需要使用 Babel 进行转移，或者使用 Javascript 的超集 Typescript 来进行开发。  如果对这一语法细节还不是很了解的话，可以先进这个传送门：htt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="装饰器 Decorator">
+<meta property="og:url" content="http://www.xiaozixiang.com/2018/07/12/decorator/index.html">
+<meta property="og:site_name" content="Xiao&#39;s Home">
+<meta property="og:description" content="许多面向对象的语言都有 装饰器(Decorator) 函数，用来修改类的行为。目前，这个方法已经被引入了 ES7，但是无论是主流浏览器还是 Node.js 对它的兼容性都不是特别友好。 因此要在项目中使用Decorator的话，需要使用 Babel 进行转移，或者使用 Javascript 的超集 Typescript 来进行开发。  如果对这一语法细节还不是很了解的话，可以先进这个传送门：htt">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-07-12T09:41:52.664Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="装饰器 Decorator">
+<meta name="twitter:description" content="许多面向对象的语言都有 装饰器(Decorator) 函数，用来修改类的行为。目前，这个方法已经被引入了 ES7，但是无论是主流浏览器还是 Node.js 对它的兼容性都不是特别友好。 因此要在项目中使用Decorator的话，需要使用 Babel 进行转移，或者使用 Javascript 的超集 Typescript 来进行开发。  如果对这一语法细节还不是很了解的话，可以先进这个传送门：htt">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.xiaozixiang.com/2018/07/12/decorator/"/>
+
+
+
+
+
+  <title>装饰器 Decorator | Xiao's Home</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Xiao's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.xiaozixiang.com/2018/07/12/decorator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Xiao's Home">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xiao's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">装饰器 Decorator</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-12T17:41:10+08:00">
+                2018-07-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>许多面向对象的语言都有 <strong>装饰器(Decorator)</strong> 函数，用来修改类的行为。目前，这个方法已经被引入了 <strong>ES7</strong>，但是无论是主流浏览器还是 Node.js 对它的兼容性都不是特别友好。</p>
+<p>因此要在项目中使用<code>Decorator</code>的话，需要使用 <strong>Babel</strong> 进行转移，或者使用 Javascript 的超集 <strong>Typescript</strong> 来进行开发。</p>
+<blockquote>
+<p>如果对这一语法细节还不是很了解的话，可以先进这个传送门：<a href="http://es6.ruanyifeng.com/#docs/decorator" target="_blank" rel="noopener">http://es6.ruanyifeng.com/#docs/decorator</a> ，跟着阮一峰老师一起了解一下它的特性。</p>
+</blockquote>
+<h3 id="初衷"><a href="#初衷" class="headerlink" title="初衷"></a>初衷</h3><p>使用 <strong>装饰器</strong> 的初衷来自于不想修改原来接口的情况下，能让一件事表现得更好。就像：</p>
+<ul>
+<li>手机可以用，但是加了手机壳就能防摔；</li>
+<li>椅子可以坐，但是垫了垫子就能够坐的更舒服；</li>
+<li>步枪可以射击，但是加了瞄准镜就可以射的更准；</li>
+<li>……</li>
+</ul>
+<p>如果要更加抽象地理解，在计算机领域，它就可以被应用到日志收集、错误捕获、安全检查、缓存、调试、持久化等等方面。</p>
+<h3 id="常用的装饰器"><a href="#常用的装饰器" class="headerlink" title="常用的装饰器"></a>常用的装饰器</h3><p>常用的装饰器一般有 <strong>类装饰器</strong> 和 <strong>方法装饰器</strong>，当然也会有<strong>属性装饰器</strong>，但是用的不多就不多讨论了。</p>
+<h4 id="类装饰器"><a href="#类装饰器" class="headerlink" title="类装饰器"></a>类装饰器</h4><p>主要应用于类构造函数，其参数是类的构造函数：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">testable</span>(<span class="params">target</span>) </span>&#123;</span><br><span class="line">    target.prototype.isTestable = <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@testable</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyTestableClass</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> obj = <span class="keyword">new</span> MyTestableClass()</span><br><span class="line">obj.isTestable <span class="comment">// true</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>注意：</strong> 这里的<code>target</code>参数如果直接给它添加方法，获得的是一个静态方法，相当于在<code>class</code>的方法前添加<code>static</code>关键字；如果想添加实例属性，可以通过目标类的<code>prototype</code>对象操作。</p>
+<p>现在我们就用 <strong>类装饰器</strong> 实现一个捕获方法执行时间的装饰器：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sleepTimeClass = <span class="function">(<span class="params">timeHandler?: (time?: number</span>) =&gt;</span> <span class="keyword">void</span>) =&gt; <span class="function">(<span class="params">target: any</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">Object</span>.getOwnPropertyNames(target.prototype).forEach(<span class="function"><span class="params">key</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> func = target.prototype[key]</span><br><span class="line">        target.prototype[key] = <span class="keyword">async</span> (...args: any[]) =&gt; &#123;</span><br><span class="line">            <span class="keyword">const</span> startTime = <span class="keyword">await</span> +<span class="keyword">new</span> <span class="built_in">Date</span>()</span><br><span class="line">            <span class="keyword">await</span> func.apply(<span class="keyword">this</span>, args)</span><br><span class="line">            <span class="keyword">const</span> endTime = <span class="keyword">await</span> +<span class="keyword">new</span> <span class="built_in">Date</span>()</span><br><span class="line">            timeHandler &amp;&amp; <span class="keyword">await</span> timeHandler(endTime - startTime)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> target</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>之所以还在外面包了一层函数，是为了通过柯里化，让使用者可以再进一步处理得到的执行时间：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sleepTimeClassTimer = sleepTimeClass(<span class="function"><span class="params">time</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'执行时间'</span>, <span class="string">`<span class="subst">$&#123;time&#125;</span>ms`</span>)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">@sleepTimeClassTimer</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">homepageController</span> </span>&#123;</span><br><span class="line">    <span class="keyword">async</span> get(ctx: any) &#123;</span><br><span class="line">        ctx.response.body = <span class="keyword">await</span> pageService.homeHtml(<span class="string">'/page/helloworld'</span>, <span class="string">'/page/404'</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样，每次<code>class</code>中的方法执行完之后就会打印出相应的执行时间。</p>
+<h4 id="方法装饰器"><a href="#方法装饰器" class="headerlink" title="方法装饰器"></a>方法装饰器</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">readonly</span>(<span class="params">target, name, descriptor</span>)</span>&#123;</span><br><span class="line">    <span class="comment">// descriptor对象原来的值如下</span></span><br><span class="line">    <span class="comment">// &#123;</span></span><br><span class="line">    <span class="comment">//   value: specifiedFunction,</span></span><br><span class="line">    <span class="comment">//   enumerable: false,</span></span><br><span class="line">    <span class="comment">//   configurable: true,</span></span><br><span class="line">    <span class="comment">//   writable: true</span></span><br><span class="line">    <span class="comment">// &#125;</span></span><br><span class="line">    descriptor.writable = <span class="literal">false</span></span><br><span class="line">    <span class="keyword">return</span> descriptor</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">readonly(Person.prototype, <span class="string">'name'</span>, descriptor)</span><br><span class="line"><span class="comment">// 类似于</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(Person.prototype, <span class="string">'name'</span>, descriptor)</span><br></pre></td></tr></table></figure>
+<p>由于在异步编程的时候，<code>async</code>和<code>await</code>的异常很难捕获，如果强行用<code>try...catch</code>来搞，捕捉不完不说，代码看起来还很难看，使用装饰器就很简单了：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> asyncMethod = <span class="function">(<span class="params">errorHandler?: (error?: <span class="built_in">Error</span></span>) =&gt;</span> <span class="keyword">void</span>) =&gt; <span class="function">(<span class="params">...args: any[]</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> func = args[<span class="number">2</span>].value</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        get() &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="function">(<span class="params">...args: any[]</span>) =&gt;</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">Promise</span>.resolve(func.apply(<span class="keyword">this</span>, args)).catch(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">                    errorHandler &amp;&amp; errorHandler(error)</span><br><span class="line">                &#125;)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        set(newValue: any) &#123;</span><br><span class="line">            <span class="keyword">return</span> newValue</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接着使用方法装饰器：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> errorAsyncMethod = asyncMethod(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.error(<span class="string">'错误警告'</span>, error)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">homepageController</span> </span>&#123;</span><br><span class="line">    @errorAsyncMethod <span class="keyword">async</span> get(ctx: any) &#123;</span><br><span class="line">        ctx.response.body = <span class="keyword">await</span> pageService.homeHtml(<span class="string">'/page/helloworld'</span>, <span class="string">'/page/404'</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="装饰器加载顺序"><a href="#装饰器加载顺序" class="headerlink" title="装饰器加载顺序"></a>装饰器加载顺序</h3><p>一个类或者方法可以嵌套很多个装饰器，所以搞清楚它们的执行顺序也很重要：</p>
+<ul>
+<li>有多个参数装饰器时，从最后一个参数依次向前执行；</li>
+<li>方法和方法参数中参数装饰器先执行；</li>
+<li>类装饰器总是最后执行；</li>
+<li>方法和属性装饰器，谁在前面谁先执行；</li>
+<li>因为参数属于方法一部分，所以参数会一直紧紧挨着方法执行。</li>
+</ul>
+<h3 id="装饰器的应用"><a href="#装饰器的应用" class="headerlink" title="装饰器的应用"></a>装饰器的应用</h3><p>在初衷那里就已经提到了，试着想象一下，只需要几个装饰器就可以完成前后端基本的性能和日志监控，是不是很有意思？</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/11/node_middleware/" rel="next" title="Node.js 中间件模式">
+                <i class="fa fa-chevron-left"></i> Node.js 中间件模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Xiao's Home</p>
+              <p class="site-description motion-element" itemprop="description">VIPKID 长期招聘前端工程师，简历可以发送到 xiaozixiang@vipkid.com.cn</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/yourname" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/2834174855" target="_blank" title="微博">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>微博</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://www.jianshu.com/u/d877bc182fb4" target="_blank" title="简书">
+                      
+                        <i class="fa fa-fw fa-user"></i>简书</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#初衷"><span class="nav-number">1.</span> <span class="nav-text">初衷</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#常用的装饰器"><span class="nav-number">2.</span> <span class="nav-text">常用的装饰器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#类装饰器"><span class="nav-number">2.1.</span> <span class="nav-text">类装饰器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方法装饰器"><span class="nav-number">2.2.</span> <span class="nav-text">方法装饰器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#装饰器加载顺序"><span class="nav-number">3.</span> <span class="nav-text">装饰器加载顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#装饰器的应用"><span class="nav-number">4.</span> <span class="nav-text">装饰器的应用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiao's Home</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
